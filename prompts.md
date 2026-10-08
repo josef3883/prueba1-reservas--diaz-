@@ -139,11 +139,5 @@ en el respuestas.md no incluyas citas, si este y promts ya estan bien, haz un ul
 ## Prompt 19
 
 ```text
-esto ya no cuenta, si estan hehcos todos los pasos? esta ya todo en el repo? el bundle y eso no? ya esta solo par subir
-```
-
-## Prompt 20
-
-```text
-sisi actualiza ya y de ahi ya estaria no
+Sí, créalo
 ```
