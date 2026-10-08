@@ -135,3 +135,15 @@ en el respuestas.md no incluyas citas, si este y promts ya estan bien, haz un ul
 6\. Antes de que termine la hora, sube al aula virtual **\*\*los dos archivos\*\***, el \`.bundle\` y el\
    \`.zip\`, y pega en el comentario el enlace de tu repositorio.
 ````
+
+## Prompt 19
+
+```text
+esto ya no cuenta, si estan hehcos todos los pasos? esta ya todo en el repo? el bundle y eso no? ya esta solo par subir
+```
+
+## Prompt 20
+
+```text
+sisi actualiza ya y de ahi ya estaria no
+```
