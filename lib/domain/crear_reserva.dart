@@ -36,12 +36,17 @@ class CrearReserva {
         continue;
       }
 
-      final reserva = await repositorio.guardar(SolicitudReserva(
-        salaId: salaId,
-        usuarioId: solicitud.usuarioId,
-        inicio: solicitud.inicio,
-        fin: solicitud.fin,
-      ));
+      late final Reserva reserva;
+      try {
+        reserva = await repositorio.guardar(SolicitudReserva(
+          salaId: salaId,
+          usuarioId: solicitud.usuarioId,
+          inicio: solicitud.inicio,
+          fin: solicitud.fin,
+        ));
+      } on ReservaSolapadaException {
+        continue;
+      }
       return ResultadoReserva.aceptada(reserva);
     }
 

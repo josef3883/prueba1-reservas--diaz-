@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reservas_sala/domain/crear_reserva.dart';
 import 'package:reservas_sala/domain/reserva.dart';
+import 'package:reservas_sala/domain/reservas_repository.dart';
 
 import 'support/reservas_en_memoria.dart';
 
@@ -180,4 +181,51 @@ void main() {
     expect(resultado.mensaje, 'No hay salas disponibles');
     expect(repositorio.reservas, hasLength(3));
   });
+
+  test('si hay una carrera al guardar, intenta la siguiente sala', () async {
+    final repositorioConCarrera = ReservasConConflictosDeInsercion({'Sala A'});
+    final crearConCarrera = CrearReserva(repositorioConCarrera);
+
+    final resultado = await crearConCarrera(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(9),
+      fin: hora(10),
+    ));
+
+    expect(resultado.aceptada, isTrue);
+    expect(resultado.reserva?.salaId, 'Sala B');
+  });
+
+  test('rechaza con el mismo mensaje si todas las inserciones chocan',
+      () async {
+    final repositorioConCarrera =
+        ReservasConConflictosDeInsercion(salas.toSet());
+    final crearConCarrera = CrearReserva(repositorioConCarrera);
+
+    final resultado = await crearConCarrera(SolicitudReserva(
+      salaId: 'Sala A',
+      usuarioId: 'u1',
+      inicio: hora(9),
+      fin: hora(10),
+    ));
+
+    expect(resultado.aceptada, isFalse);
+    expect(resultado.mensaje, 'No hay salas disponibles');
+  });
+}
+
+class ReservasConConflictosDeInsercion extends ReservasEnMemoria {
+  ReservasConConflictosDeInsercion(Set<String> salasQueChocan)
+      : salasQueChocan = Set.of(salasQueChocan);
+
+  final Set<String> salasQueChocan;
+
+  @override
+  Future<Reserva> guardar(SolicitudReserva solicitud) async {
+    if (salasQueChocan.remove(solicitud.salaId)) {
+      throw const ReservaSolapadaException();
+    }
+    return super.guardar(solicitud);
+  }
 }
