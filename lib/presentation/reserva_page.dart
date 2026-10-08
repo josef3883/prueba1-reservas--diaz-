@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/crear_reserva.dart';
+import '../domain/reserva.dart';
 
 class ReservaPage extends StatefulWidget {
   const ReservaPage({super.key, required this.crearReserva});
@@ -13,10 +14,8 @@ class ReservaPage extends StatefulWidget {
 }
 
 class _ReservaPageState extends State<ReservaPage> {
-  static const _salas = ['Sala A', 'Sala B', 'Sala C'];
-
   final _usuarioController = TextEditingController();
-  String _sala = _salas.first;
+  late String _sala;
   TimeOfDay _inicio = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _fin = const TimeOfDay(hour: 10, minute: 0);
   String? _mensaje;
@@ -24,7 +23,9 @@ class _ReservaPageState extends State<ReservaPage> {
   @override
   void initState() {
     super.initState();
-    _usuarioController.text = Supabase.instance.client.auth.currentUser?.id ?? '';
+    _sala = widget.crearReserva.salas.first;
+    _usuarioController.text =
+        Supabase.instance.client.auth.currentUser?.id ?? '';
   }
 
   @override
@@ -57,14 +58,20 @@ class _ReservaPageState extends State<ReservaPage> {
 
   Future<void> _reservar() async {
     try {
-      await Supabase.instance.client.from('reservas').insert({
-        'sala_id': _sala,
-        'usuario_id': _usuarioController.text,
-        'inicio': _hoyA(_inicio).toUtc().toIso8601String(),
-        'fin': _hoyA(_fin).toUtc().toIso8601String(),
+      final resultado = await widget.crearReserva(SolicitudReserva(
+        salaId: _sala,
+        usuarioId: _usuarioController.text,
+        inicio: _hoyA(_inicio),
+        fin: _hoyA(_fin),
+      ));
+      if (!mounted) return;
+      setState(() {
+        _mensaje = resultado.aceptada
+            ? 'Reserva creada en ${resultado.reserva!.salaId}'
+            : resultado.mensaje;
       });
-      setState(() => _mensaje = 'Reserva creada');
     } on PostgrestException catch (e) {
+      if (!mounted) return;
       setState(() => _mensaje = 'No se pudo reservar: ${e.message}');
     }
   }
@@ -80,7 +87,7 @@ class _ReservaPageState extends State<ReservaPage> {
           children: [
             DropdownButton<String>(
               value: _sala,
-              items: _salas
+              items: widget.crearReserva.salas
                   .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                   .toList(),
               onChanged: (valor) => setState(() => _sala = valor ?? _sala),
