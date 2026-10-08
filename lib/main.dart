@@ -11,7 +11,12 @@ Future<void> main() async {
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
   final repositorio = SupabaseReservasRepository(Supabase.instance.client);
-  runApp(ReservasApp(crearReserva: CrearReserva(repositorio)));
+  runApp(ReservasApp(
+    crearReserva: CrearReserva(
+      repositorio,
+      salas: const ['Sala A', 'Sala B', 'Sala C'],
+    ),
+  ));
 }
 
 class ReservasApp extends StatelessWidget {

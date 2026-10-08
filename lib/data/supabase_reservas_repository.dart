@@ -16,17 +16,24 @@ class SupabaseReservasRepository implements ReservasRepository {
 
   @override
   Future<Reserva> guardar(SolicitudReserva solicitud) async {
-    final fila = await cliente
-        .from('reservas')
-        .insert({
-          'sala_id': solicitud.salaId,
-          'usuario_id': solicitud.usuarioId,
-          'inicio': solicitud.inicio.toUtc().toIso8601String(),
-          'fin': solicitud.fin.toUtc().toIso8601String(),
-        })
-        .select()
-        .single();
-    return _aReserva(fila);
+    try {
+      final fila = await cliente
+          .from('reservas')
+          .insert({
+            'sala_id': solicitud.salaId,
+            'usuario_id': solicitud.usuarioId,
+            'inicio': solicitud.inicio.toUtc().toIso8601String(),
+            'fin': solicitud.fin.toUtc().toIso8601String(),
+          })
+          .select()
+          .single();
+      return _aReserva(fila);
+    } on PostgrestException catch (error) {
+      if (error.code == '23P01') {
+        throw const ReservaSolapadaException();
+      }
+      rethrow;
+    }
   }
 
   Reserva _aReserva(Map<String, dynamic> fila) => Reserva(
